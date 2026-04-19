@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+{% block title %}{{ medecin }}{% endblock %}
+{% block content %}
+<div class="card">
+  {% if medecin.photo %}
+    <img src="{{ medecin.photo.url }}" alt="photo"
+         style="width:150px; height:150px; object-fit:cover; border-radius:50%; display:block; margin-bottom:15px;">
+  {% endif %}
+  <h2>{{ medecin }}</h2>
+  <p style="color:#2980b9; font-size:1.1em;">{{ medecin.specialite }}</p>
+  <p><strong>Adresse :</strong> {{ medecin.adresse_cabinet }}, {{ medecin.ville }}</p>
+  <p><strong>Tarif :</strong> {{ medecin.tarif }} MAD</p>
+  <p><strong>Description :</strong> {{ medecin.description }}</p>
+
+  <h3 class="mt-20">Disponibilites</h3>
+  <table>
+    <thead>
+      <tr><th>Jour</th><th>De</th><th>A</th></tr>
+    </thead>
+    <tbody>
+      {% for d in medecin.disponibilites.all %}
+      <tr>
+        <td>{{ d.get_jour_display }}</td>
+        <td>{{ d.heure_debut }}</td>
+        <td>{{ d.heure_fin }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" class="text-muted">Aucune disponibilite.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="mt-20">
+    <a href="{% url 'rdv_create' medecin.pk %}" class="btn btn-green">
+      Prendre rendez-vous
+    </a>
+    <a href="{% url 'medecins_list' %}" class="btn btn-grey" style="margin-left:10px;">
+      Retour
+    </a>
+  </div>
+</div>
+{% endblock %}

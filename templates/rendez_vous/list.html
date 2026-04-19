@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+{% block title %}Mes Rendez-vous{% endblock %}
+{% block content %}
+<h2>Mes Rendez-vous</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Medecin</th>
+      <th>Date</th>
+      <th>Heure</th>
+      <th>Statut</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rdv in rdvs %}
+    <tr>
+      <td>{{ rdv.medecin }}</td>
+      <td>{{ rdv.date }}</td>
+      <td>{{ rdv.heure }}</td>
+      <td>
+        {% if rdv.statut == 'confirme' %}
+          <span class="badge badge-green">Confirme</span>
+        {% elif rdv.statut == 'annule' %}
+          <span class="badge badge-red">Annule</span>
+        {% elif rdv.statut == 'termine' %}
+          <span class="badge badge-grey">Termine</span>
+        {% else %}
+          <span class="badge badge-yellow">En attente</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4" class="text-muted text-center">Aucun rendez-vous.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

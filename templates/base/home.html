@@ -1,0 +1,9 @@
+{% extends 'base/base.html' %}
+{% block title %}Accueil{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Bienvenue sur MediRDV</h1>
+  <p>Trouvez un medecin et prenez rendez-vous en quelques clics.</p>
+  <a href="{% url 'medecins_list' %}" class="btn">Trouver un medecin</a>
+</div>
+{% endblock %}

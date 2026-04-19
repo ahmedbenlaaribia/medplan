@@ -1,0 +1,24 @@
+{% extends 'base/base.html' %}
+{% block title %}Prendre RDV{% endblock %}
+{% block content %}
+<div class="card" style="max-width:500px; margin:0 auto;">
+  <h2>Rendez-vous avec {{ medecin }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label>Date</label>
+      <input type="date" name="date" required>
+    </div>
+    <div class="field">
+      <label>Heure</label>
+      <input type="time" name="heure" required>
+    </div>
+    <div class="field">
+      <label>Motif</label>
+      <textarea name="motif" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-green">Confirmer</button>
+    <a href="{% url 'medecins_list' %}" class="btn btn-grey" style="margin-left:10px;">Annuler</a>
+  </form>
+</div>
+{% endblock %}

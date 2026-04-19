@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+media/
+.env
+.vscode/
+Thumbs.db

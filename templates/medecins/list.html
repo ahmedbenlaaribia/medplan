@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+{% block title %}Nos Medecins{% endblock %}
+{% block content %}
+<h2>Nos Medecins</h2>
+
+<form method="get" class="search-form">
+  <input type="text" name="nom" placeholder="Nom du medecin" value="{{ request.GET.nom }}">
+  <input type="text" name="ville" placeholder="Ville" value="{{ request.GET.ville }}">
+  <select name="specialite">
+    <option value="">Toutes les specialites</option>
+    {% for s in specialites %}
+      <option value="{{ s.id }}">{{ s.nom }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn">Rechercher</button>
+</form>
+
+<div class="cards-grid">
+  {% for medecin in medecins %}
+  <div class="card">
+    {% if medecin.photo %}
+      <img src="{{ medecin.photo.url }}" alt="photo"
+           style="width:100%; height:180px; object-fit:cover; border-radius:5px; margin-bottom:10px;">
+    {% endif %}
+    <h3>{{ medecin }}</h3>
+    <p style="color:#2980b9;">{{ medecin.specialite }}</p>
+    <p>Ville : {{ medecin.ville }}</p>
+    <p>Tarif : {{ medecin.tarif }} MAD</p>
+    <a href="{% url 'medecin_detail' medecin.pk %}" class="btn">Voir le profil</a>
+  </div>
+  {% empty %}
+  <p class="text-muted">Aucun medecin trouve.</p>
+  {% endfor %}
+</div>
+{% endblock %}
