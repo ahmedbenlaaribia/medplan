@@ -1,24 +1,371 @@
 {% extends 'base/base.html' %}
-{% block title %}Prendre RDV{% endblock %}
+{% block title %}Prendre RDV — {{ medecin }}{% endblock %}
 {% block content %}
-<div class="card" style="max-width:500px; margin:0 auto;">
-  <h2>Rendez-vous avec {{ medecin }}</h2>
-  <form method="post">
-    {% csrf_token %}
-    <div class="field">
-      <label>Date</label>
-      <input type="date" name="date" required>
+
+<style>
+  /* ── PAGE ───────────────────────────────────────────────────── */
+  .rdv-page {
+    padding: 48px 0 80px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ── BREADCRUMB ─────────────────────────────────────────────── */
+  .rdv-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: rdvUp .5s .05s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .rdv-breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+
+  .rdv-breadcrumb a:hover { color: var(--teal); }
+  .rdv-breadcrumb__sep { opacity: .4; }
+
+  /* ── DOCTOR STRIP ───────────────────────────────────────────── */
+  .rdv-doctor {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: white;
+    border: 1px solid rgba(11,31,58,.07);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 14px rgba(11,31,58,.05);
+    opacity: 0;
+    animation: rdvUp .55s .1s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .rdv-doctor__avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(14,165,160,.25);
+    flex-shrink: 0;
+  }
+
+  .rdv-doctor__avatar-placeholder {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e8f4f4, #d4eeed);
+    border: 2px solid rgba(14,165,160,.25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rdv-doctor__label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 3px;
+  }
+
+  .rdv-doctor__name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+
+  .rdv-doctor__spec {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ── FORM CARD ──────────────────────────────────────────────── */
+  .rdv-card {
+    background: white;
+    border-radius: 22px;
+    padding: 32px;
+    border: 1px solid rgba(11,31,58,.07);
+    box-shadow: 0 4px 28px rgba(11,31,58,.07);
+    opacity: 0;
+    animation: rdvUp .6s .18s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .rdv-card__header {
+    margin-bottom: 28px;
+  }
+
+  .rdv-card__title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.45rem;
+    color: var(--navy);
+    margin-bottom: 5px;
+  }
+
+  .rdv-card__sub {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* ── FIELDS ─────────────────────────────────────────────────── */
+  .rdv-field {
+    margin-bottom: 20px;
+  }
+
+  .rdv-field label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 8px;
+    opacity: .75;
+  }
+
+  .rdv-field label svg { color: var(--teal); }
+
+  .rdv-input-wrap {
+    position: relative;
+  }
+
+  .rdv-input-wrap input,
+  .rdv-input-wrap textarea {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid rgba(11,31,58,.1);
+    border-radius: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: var(--navy);
+    background: #f7f5f0;
+    outline: none;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .rdv-input-wrap input:focus,
+  .rdv-input-wrap textarea:focus {
+    border-color: var(--teal);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(14,165,160,.1);
+  }
+
+  .rdv-input-wrap textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+  }
+
+  /* Date & time side by side */
+  .rdv-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 420px) {
+    .rdv-row { grid-template-columns: 1fr; }
+  }
+
+  /* ── DIVIDER ────────────────────────────────────────────────── */
+  .rdv-divider {
+    height: 1px;
+    background: rgba(11,31,58,.07);
+    margin: 24px 0;
+  }
+
+  /* ── ACTIONS ────────────────────────────────────────────────── */
+  .rdv-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .rdv-btn-confirm {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--teal);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 14px 24px;
+    border-radius: 13px;
+    transition: background .2s, transform .18s, box-shadow .2s;
+    box-shadow: 0 4px 16px rgba(14,165,160,.28);
+  }
+
+  .rdv-btn-confirm:hover {
+    background: #0b9490;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(14,165,160,.35);
+  }
+
+  .rdv-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 14px 18px;
+    border-radius: 13px;
+    border: 1.5px solid rgba(11,31,58,.1);
+    transition: border-color .2s, color .2s;
+    white-space: nowrap;
+  }
+
+  .rdv-btn-cancel:hover {
+    border-color: var(--navy);
+    color: var(--navy);
+  }
+
+  /* ── PRIVACY NOTE ───────────────────────────────────────────── */
+  .rdv-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .rdv-note svg { flex-shrink: 0; color: var(--teal); opacity: .7; }
+
+  /* ── ANIMATION ──────────────────────────────────────────────── */
+  @keyframes rdvUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="rdv-page">
+
+  <!-- Breadcrumb -->
+  <nav class="rdv-breadcrumb" aria-label="breadcrumb">
+    <a href="{% url 'medecins_list' %}">Médecins</a>
+    <span class="rdv-breadcrumb__sep">›</span>
+    <a href="{% url 'medecin_detail' medecin.pk %}">{{ medecin }}</a>
+    <span class="rdv-breadcrumb__sep">›</span>
+    <span>Rendez-vous</span>
+  </nav>
+
+  <!-- Doctor strip -->
+  <div class="rdv-doctor">
+    {% if medecin.photo %}
+      <img class="rdv-doctor__avatar" src="{{ medecin.photo.url }}" alt="Photo de {{ medecin }}">
+    {% else %}
+      <div class="rdv-doctor__avatar-placeholder">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="8" r="4.5" stroke="#0ea5a0" stroke-width="1.5"/>
+          <path d="M2 20c0-5 4-8 9-8s9 3 9 8" stroke="#0ea5a0" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    {% endif %}
+    <div>
+      <div class="rdv-doctor__label">Votre médecin</div>
+      <div class="rdv-doctor__name">{{ medecin }}</div>
+      <div class="rdv-doctor__spec">{{ medecin.specialite }} · {{ medecin.ville }}</div>
     </div>
-    <div class="field">
-      <label>Heure</label>
-      <input type="time" name="heure" required>
+  </div>
+
+  <!-- Form card -->
+  <div class="rdv-card">
+    <div class="rdv-card__header">
+      <h2 class="rdv-card__title">Choisissez votre créneau</h2>
+      <p class="rdv-card__sub">Remplissez les informations ci-dessous pour confirmer votre rendez-vous.</p>
     </div>
-    <div class="field">
-      <label>Motif</label>
-      <textarea name="motif" rows="3"></textarea>
-    </div>
-    <button type="submit" class="btn btn-green">Confirmer</button>
-    <a href="{% url 'medecins_list' %}" class="btn btn-grey" style="margin-left:10px;">Annuler</a>
-  </form>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <!-- Date & time -->
+      <div class="rdv-row">
+        <div class="rdv-field">
+          <label>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <rect x="1" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M4 1v2M9 1v2M1 5.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Date
+          </label>
+          <div class="rdv-input-wrap">
+            <input type="date" name="date" required>
+          </div>
+        </div>
+
+        <div class="rdv-field">
+          <label>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M6.5 4v3l2 1.2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Heure
+          </label>
+          <div class="rdv-input-wrap">
+            <input type="time" name="heure" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motif -->
+      <div class="rdv-field">
+        <label>
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M2 3h9M2 6.5h6M2 10h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Motif de la consultation
+        </label>
+        <div class="rdv-input-wrap">
+          <textarea name="motif" rows="3" placeholder="Décrivez brièvement la raison de votre visite…"></textarea>
+        </div>
+      </div>
+
+      <div class="rdv-divider"></div>
+
+      <!-- Actions -->
+      <div class="rdv-actions">
+        <button type="submit" class="rdv-btn-confirm">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <path d="M2.5 7.5l3.5 3.5 6.5-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Confirmer le rendez-vous
+        </button>
+        <a href="{% url 'medecin_detail' medecin.pk %}" class="rdv-btn-cancel">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M8 2L3 6.5 8 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Annuler
+        </a>
+      </div>
+
+      <!-- Privacy note -->
+      <p class="rdv-note">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M6.5 1L2 3v4c0 2.76 2 5.17 4.5 5.9C9 12.17 11 9.76 11 7V3L6.5 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        Vos informations sont confidentielles et sécurisées.
+      </p>
+    </form>
+  </div>
+
 </div>
+
 {% endblock %}
