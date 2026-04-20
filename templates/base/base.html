@@ -6,19 +6,340 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MediRDV{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'base/css/style.css' %}">
+  <style>
+    /* ── NAV ───────────────────────────────────────────────────── */
+    .site-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5vw;
+      height: 64px;
+      background: rgba(247, 245, 240, 0.82);
+      backdrop-filter: blur(18px) saturate(1.4);
+      -webkit-backdrop-filter: blur(18px) saturate(1.4);
+      border-bottom: 1px solid rgba(11, 31, 58, 0.07);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    .site-nav.scrolled {
+      background: rgba(247, 245, 240, 0.97);
+      box-shadow: 0 2px 24px rgba(11, 31, 58, 0.08);
+    }
+
+    /* Logo */
+    .site-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .site-nav__logo-icon {
+      width: 32px; height: 32px;
+      background: var(--navy);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .site-nav__logo-wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.25rem;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+
+    .site-nav__logo-wordmark em {
+      font-style: normal;
+      color: var(--teal);
+    }
+
+    /* Links */
+    .site-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      list-style: none;
+    }
+
+    .site-nav__links a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--navy);
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      padding: 7px 14px;
+      border-radius: 10px;
+      opacity: 0.65;
+      transition: opacity 0.2s, background 0.2s, color 0.2s;
+    }
+
+    .site-nav__links a:hover {
+      opacity: 1;
+      background: rgba(11, 31, 58, 0.05);
+    }
+
+    .site-nav__links a.active {
+      opacity: 1;
+      color: var(--teal);
+      background: rgba(14, 165, 160, 0.08);
+      font-weight: 500;
+    }
+
+    /* CTA pill */
+    .site-nav__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--navy);
+      color: white !important;
+      font-size: 13.5px !important;
+      font-weight: 500 !important;
+      padding: 8px 18px !important;
+      border-radius: 100px !important;
+      opacity: 1 !important;
+      transition: background 0.2s, transform 0.18s !important;
+      white-space: nowrap;
+    }
+
+    .site-nav__cta:hover {
+      background: var(--teal) !important;
+      background-color: var(--teal) !important;
+      transform: translateY(-1px);
+    }
+
+    /* Hamburger (mobile) */
+    .site-nav__burger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+
+    .site-nav__burger span {
+      display: block;
+      width: 22px; height: 1.5px;
+      background: var(--navy);
+      border-radius: 2px;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+
+    .site-nav__burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .site-nav__burger.open span:nth-child(2) { opacity: 0; }
+    .site-nav__burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    /* Mobile drawer */
+    .site-nav__drawer {
+      display: none;
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      background: rgba(247, 245, 240, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(11, 31, 58, 0.08);
+      padding: 12px 5vw 20px;
+      z-index: 199;
+      flex-direction: column;
+      gap: 2px;
+      animation: drawerSlide 0.22s ease;
+    }
+
+    .site-nav__drawer.open { display: flex; }
+
+    .site-nav__drawer a {
+      color: var(--navy);
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      padding: 11px 14px;
+      border-radius: 10px;
+      opacity: 0.75;
+      transition: opacity 0.2s, background 0.2s;
+    }
+
+    .site-nav__drawer a:hover { opacity: 1; background: rgba(11,31,58,.05); }
+
+    .site-nav__drawer .site-nav__cta {
+      margin-top: 8px;
+      justify-content: center;
+      border-radius: 12px !important;
+      padding: 12px 18px !important;
+    }
+
+    @keyframes drawerSlide {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 680px) {
+      .site-nav__links { display: none; }
+      .site-nav__burger { display: flex; }
+    }
+
+    /* ── PAGE WRAPPER — see style.css ─────────────────────────── */
+
+    /* ── FOOTER ────────────────────────────────────────────────── */
+    .site-footer {
+      margin-top: 80px;
+      padding: 36px 5vw;
+      border-top: 1px solid rgba(11, 31, 58, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .site-footer__logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: var(--navy);
+      text-decoration: none;
+    }
+
+    .site-footer__logo em { color: var(--teal); font-style: normal; }
+
+    .site-footer__copy {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .site-footer__links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .site-footer__links a {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .site-footer__links a:hover { color: var(--teal); }
+
+    @media (max-width: 540px) {
+      .site-footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
 <body>
 
-<nav>
-  <a href="{% url 'home' %}"><strong>MediRDV</strong></a>
-  <a href="{% url 'home' %}">Accueil</a>
-  <a href="{% url 'medecins_list' %}">Medecins</a>
-  <a href="{% url 'rdv_list' %}">Mes RDV</a>
+<!-- ── NAVIGATION ─────────────────────────────────────────── -->
+<nav class="site-nav" id="siteNav">
+  <a href="{% url 'home' %}" class="site-nav__logo" aria-label="MediRDV accueil">
+    <div class="site-nav__logo-icon">
+      <!-- Medical cross -->
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <rect x="5.5" y="1" width="5" height="14" rx="1.5" fill="white"/>
+        <rect x="1"   y="5.5" width="14" height="5" rx="1.5" fill="white"/>
+      </svg>
+    </div>
+    <span class="site-nav__logo-wordmark">Medi<em>RDV</em></span>
+  </a>
+
+  <ul class="site-nav__links" role="list">
+    <li>
+      <a href="{% url 'home' %}">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M1 6.5L7 1.5l6 5V13a.5.5 0 01-.5.5H9V9.5H5v4H1.5A.5.5 0 011 13V6.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        </svg>
+        Accueil
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'medecins_list' %}">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M1.5 13c0-3 2.5-4.5 5.5-4.5S12.5 10 12.5 13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        Médecins
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'rdv_list' %}" class="site-nav__cta">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <rect x="1" y="2.5" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M4.5 1v3M8.5 1v3M1 6.5h11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        Mes RDV
+      </a>
+    </li>
+  </ul>
+
+  <button class="site-nav__burger" id="navBurger" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<div class="container">
+<!-- Mobile drawer -->
+<div class="site-nav__drawer" id="navDrawer" aria-hidden="true">
+  <a href="{% url 'home' %}">Accueil</a>
+  <a href="{% url 'medecins_list' %}">Médecins</a>
+  <a href="{% url 'rdv_list' %}" class="site-nav__cta">Mes RDV</a>
+</div>
+
+<!-- ── PAGE CONTENT ───────────────────────────────────────── -->
+<div class="page-body">
   {% block content %}{% endblock %}
 </div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <a href="{% url 'home' %}" class="site-footer__logo">Medi<em>RDV</em></a>
+  <p class="site-footer__copy">© {% now "Y" %} MediRDV — Tous droits réservés</p>
+  <ul class="site-footer__links">
+    <li><a href="#">Confidentialité</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="#">Aide</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Scroll → nav shadow
+  const nav = document.getElementById('siteNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 10);
+  }, { passive: true });
+
+  // Active link highlight
+  const links = document.querySelectorAll('.site-nav__links a:not(.site-nav__cta), .site-nav__drawer a:not(.site-nav__cta)');
+  const path = window.location.pathname;
+  links.forEach(a => {
+    if (a.getAttribute('href') === path) a.classList.add('active');
+  });
+
+  // Hamburger toggle
+  const burger = document.getElementById('navBurger');
+  const drawer = document.getElementById('navDrawer');
+  burger.addEventListener('click', () => {
+    const isOpen = drawer.classList.toggle('open');
+    burger.classList.toggle('open', isOpen);
+    burger.setAttribute('aria-expanded', isOpen);
+    drawer.setAttribute('aria-hidden', !isOpen);
+  });
+
+  // Close drawer on link click
+  drawer.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      drawer.classList.remove('open');
+      burger.classList.remove('open');
+      burger.setAttribute('aria-expanded', false);
+    });
+  });
+</script>
 
 </body>
 </html>
