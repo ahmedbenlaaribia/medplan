@@ -29,11 +29,27 @@
   .mrdv-hero {
     position: relative;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr auto;
+    align-items: center;
     overflow: hidden;
-    padding: 80px 6vw 60px;
+    padding: 100px 6vw 60px;
+    gap: 0 40px;
+  }
+
+  .mrdv-content { grid-column: 1; grid-row: 1; }
+  .mrdv-visual  { grid-column: 2; grid-row: 1; }
+  .mrdv-cards   { grid-column: 1 / -1; grid-row: 2; }
+
+  @media (max-width: 900px) {
+    .mrdv-hero {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+    }
+    .mrdv-content { grid-column: 1; grid-row: 1; }
+    .mrdv-visual  { grid-column: 1; grid-row: 2; }
+    .mrdv-cards   { grid-column: 1; grid-row: 3; }
   }
 
   /* Layered background */
@@ -48,37 +64,159 @@
     z-index: 0;
   }
 
-  /* Decorative ring */
-  .mrdv-ring {
-    position: absolute;
-    right: -120px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 620px;
-    height: 620px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(14,165,160,0.18);
-    animation: ringExpand 1.4s cubic-bezier(.22,1,.36,1) both;
-    z-index: 0;
-  }
-  .mrdv-ring::before {
-    content: '';
-    position: absolute;
-    inset: 60px;
-    border-radius: 50%;
-    border: 1px solid rgba(14,165,160,0.12);
-  }
-  .mrdv-ring::after {
-    content: '';
-    position: absolute;
-    inset: 130px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(14,165,160,0.08) 0%, transparent 70%);
+  /* ── DOCTOR CAROUSEL ──────────────────── */
+  .mrdv-visual {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 520px;
+    opacity: 0;
+    animation: slideUp .8s .4s cubic-bezier(.22,1,.36,1) forwards;
   }
 
-  @keyframes ringExpand {
-    from { opacity: 0; transform: translateY(-50%) scale(.7); }
-    to   { opacity: 1; transform: translateY(-50%) scale(1); }
+  .mrdv-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    height: 460px;
+  }
+
+  /* Stack of doctor cards */
+  .mrdv-doc-card {
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateX(40px) scale(.96);
+    transition: opacity .7s cubic-bezier(.22,1,.36,1),
+                transform .7s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 20px 60px rgba(11,31,58,.18);
+  }
+
+  .mrdv-doc-card.active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    z-index: 2;
+  }
+
+  .mrdv-doc-card.prev {
+    opacity: 0;
+    transform: translateX(-40px) scale(.96);
+    z-index: 1;
+  }
+
+  /* The actual doctor illustration / placeholder */
+  .mrdv-doc-card__img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Gradient overlay at bottom */
+  .mrdv-doc-card__overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 28px 22px 22px;
+    background: linear-gradient(to top, rgba(11,31,58,.85) 0%, transparent 100%);
+  }
+
+  .mrdv-doc-card__name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .mrdv-doc-card__spec {
+    font-size: 12.5px;
+    color: rgba(255,255,255,.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mrdv-doc-card__spec::before {
+    content: '';
+    display: block;
+    width: 6px; height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+  }
+
+  /* Placeholder SVG doctor avatar */
+  .mrdv-doc-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Dots indicator */
+  .mrdv-carousel-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 18px;
+    justify-content: center;
+  }
+
+  .mrdv-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(11,31,58,.2);
+    transition: background .3s, transform .3s;
+    cursor: pointer;
+  }
+
+  .mrdv-dot.active {
+    background: var(--teal);
+    transform: scale(1.3);
+  }
+
+  /* Floating tag beside carousel */
+  .mrdv-float-tag {
+    position: absolute;
+    background: white;
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: 0 8px 28px rgba(11,31,58,.12);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: floatBob 4s ease-in-out infinite;
+  }
+
+  .mrdv-float-tag:nth-of-type(1) { top: 30px; right: -20px; animation-delay: 0s; }
+  .mrdv-float-tag:nth-of-type(2) { bottom: 60px; left: -30px; animation-delay: 2s; }
+
+  .mrdv-float-tag__icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: rgba(14,165,160,.12);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .mrdv-float-tag__label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .mrdv-float-tag__value {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  @keyframes floatBob {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-7px); }
   }
 
   /* Floating cross icons */
@@ -291,39 +429,66 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Responsive */
+  /* ── OVERRIDES for base.css conflicts ──────────────────────────── */
+
+  /* 1. Kill the body background & font so .mrdv-page controls it */
+  body:has(.mrdv-page) {
+    background-color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* 2. Neutralise base h1/h2/h3 color rule inside our page */
+  .mrdv-page h1,
+  .mrdv-page h2,
+  .mrdv-page h3 {
+    color: inherit; /* let each element set its own color */
+  }
+
+  /* 3. Neutralise base .btn styles — our buttons use .mrdv-btn-* */
+  .mrdv-page .btn {
+    all: unset;
+  }
+
+  /* 4. Make nav transparent over the hero so it floats cleanly */
+  body:has(.mrdv-page) nav {
+    background-color: transparent;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 22px 6vw;
+  }
+  body:has(.mrdv-page) nav a {
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    font-weight: 500;
+    opacity: 0.75;
+    transition: opacity .2s, color .2s;
+  }
+  body:has(.mrdv-page) nav a:hover {
+    text-decoration: none;
+    opacity: 1;
+    color: var(--teal);
+  }
+
+  /* 5. Give the hero top-padding so content clears the now-absolute nav */
+  .mrdv-hero {
+    padding-top: 120px;
+  }
+
+  /* ── RESPONSIVE ─────────────────────────────────────────────── */
   @media (max-width: 640px) {
     .mrdv-ring { width: 380px; height: 380px; right: -160px; }
     .mrdv-cards { flex-direction: column; }
     .mrdv-stats { gap: 24px; }
+    body:has(.mrdv-page) nav { position: relative; background-color: var(--navy); }
+    body:has(.mrdv-page) nav a { color: white; }
+    .mrdv-hero { padding-top: 60px; }
   }
 </style>
 
 <div class="mrdv-page">
   <section class="mrdv-hero">
-
-    <!-- Decorative ring -->
-    <div class="mrdv-ring"></div>
-
-    <!-- Floating medical crosses -->
-    <div class="mrdv-cross">
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="6" y="0" width="6" height="18" rx="2" fill="rgba(14,165,160,0.25)"/>
-        <rect x="0" y="6" width="18" height="6" rx="2" fill="rgba(14,165,160,0.25)"/>
-      </svg>
-    </div>
-    <div class="mrdv-cross">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <rect x="4" y="0" width="4" height="12" rx="1.5" fill="rgba(11,31,58,0.18)"/>
-        <rect x="0" y="4" width="12" height="4" rx="1.5" fill="rgba(11,31,58,0.18)"/>
-      </svg>
-    </div>
-    <div class="mrdv-cross">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="7" y="0" width="8" height="22" rx="2.5" fill="rgba(14,165,160,0.14)"/>
-        <rect x="0" y="7" width="22" height="8" rx="2.5" fill="rgba(14,165,160,0.14)"/>
-      </svg>
-    </div>
 
     <!-- Main content -->
     <div class="mrdv-content">
@@ -373,6 +538,190 @@
       </div>
     </div>
 
+    <!-- Doctor Carousel -->
+    <div class="mrdv-visual">
+      <div class="mrdv-carousel" id="docCarousel">
+
+        <!-- Card 1 — Cardiologue -->
+        <div class="mrdv-doc-card active">
+          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #e0f2f1 0%, #b2dfdb 100%);">
+            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Body -->
+              <ellipse cx="90" cy="260" rx="70" ry="80" fill="#0b9490" opacity=".18"/>
+              <!-- White coat -->
+              <path d="M40 200 Q50 160 90 155 Q130 160 140 200 L148 320 H32 Z" fill="white" opacity=".92"/>
+              <!-- Stethoscope -->
+              <path d="M72 185 Q68 210 72 225 Q76 238 85 240 Q95 242 100 230 Q105 218 102 205" stroke="#0ea5a0" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <circle cx="102" cy="202" r="5" fill="#0ea5a0"/>
+              <!-- Collar/shirt -->
+              <path d="M78 155 L90 175 L102 155" fill="#0b9490" opacity=".3"/>
+              <!-- Head -->
+              <ellipse cx="90" cy="100" rx="38" ry="44" fill="#f5cba7"/>
+              <!-- Hair -->
+              <ellipse cx="90" cy="62" rx="38" ry="18" fill="#4a3728"/>
+              <ellipse cx="56" cy="85" rx="8" ry="22" fill="#4a3728"/>
+              <ellipse cx="124" cy="85" rx="8" ry="22" fill="#4a3728"/>
+              <!-- Eyes -->
+              <ellipse cx="77" cy="98" rx="5" ry="6" fill="white"/>
+              <ellipse cx="103" cy="98" rx="5" ry="6" fill="white"/>
+              <circle cx="78" cy="99" r="3" fill="#2c1810"/>
+              <circle cx="104" cy="99" r="3" fill="#2c1810"/>
+              <!-- Smile -->
+              <path d="M80 116 Q90 124 100 116" stroke="#c0856a" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <!-- Shoulders -->
+              <path d="M52 155 Q40 158 38 175" stroke="white" stroke-width="3" fill="none" opacity=".9"/>
+              <path d="M128 155 Q140 158 142 175" stroke="white" stroke-width="3" fill="none" opacity=".9"/>
+            </svg>
+          </div>
+          <div class="mrdv-doc-card__overlay">
+            <div class="mrdv-doc-card__name">Dr. Sarah Benali</div>
+            <div class="mrdv-doc-card__spec">Cardiologue · Casablanca</div>
+          </div>
+        </div>
+
+        <!-- Card 2 — Pédiatre -->
+        <div class="mrdv-doc-card">
+          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%);">
+            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="90" cy="260" rx="70" ry="80" fill="#27ae60" opacity=".14"/>
+              <path d="M42 198 Q52 158 90 153 Q128 158 138 198 L146 320 H34 Z" fill="white" opacity=".92"/>
+              <!-- Green coat trim -->
+              <path d="M42 198 Q52 158 90 153" stroke="#27ae60" stroke-width="4" fill="none" opacity=".5"/>
+              <path d="M138 198 Q128 158 90 153" stroke="#27ae60" stroke-width="4" fill="none" opacity=".5"/>
+              <!-- Stethoscope -->
+              <path d="M74 183 Q70 208 74 222 Q78 235 87 237 Q97 239 102 227 Q107 215 104 202" stroke="#27ae60" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <circle cx="104" cy="199" r="5" fill="#27ae60"/>
+              <!-- Head -->
+              <ellipse cx="90" cy="97" rx="36" ry="42" fill="#fde3c4"/>
+              <!-- Hair (short) -->
+              <ellipse cx="90" cy="61" rx="36" ry="16" fill="#1a0a00"/>
+              <!-- Glasses -->
+              <rect x="69" y="93" width="16" height="11" rx="5" stroke="#1a0a00" stroke-width="2" fill="none"/>
+              <rect x="95" y="93" width="16" height="11" rx="5" stroke="#1a0a00" stroke-width="2" fill="none"/>
+              <line x1="85" y1="98" x2="95" y2="98" stroke="#1a0a00" stroke-width="2"/>
+              <!-- Eyes behind glasses -->
+              <circle cx="77" cy="98" r="3" fill="#1a0a00"/>
+              <circle cx="103" cy="98" r="3" fill="#1a0a00"/>
+              <!-- Smile -->
+              <path d="M78 114 Q90 123 102 114" stroke="#c07a5a" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="mrdv-doc-card__overlay">
+            <div class="mrdv-doc-card__name">Dr. Karim Idrissi</div>
+            <div class="mrdv-doc-card__spec">Pédiatre · Rabat</div>
+          </div>
+        </div>
+
+        <!-- Card 3 — Dermatologue -->
+        <div class="mrdv-doc-card">
+          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #fce4ec 0%, #f8bbd0 100%);">
+            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="90" cy="262" rx="70" ry="78" fill="#e91e63" opacity=".1"/>
+              <path d="M44 200 Q54 160 90 155 Q126 160 136 200 L144 320 H36 Z" fill="white" opacity=".95"/>
+              <path d="M44 200 Q54 160 90 155" stroke="#e91e63" stroke-width="3" fill="none" opacity=".4"/>
+              <path d="M136 200 Q126 160 90 155" stroke="#e91e63" stroke-width="3" fill="none" opacity=".4"/>
+              <!-- Clipboard prop -->
+              <rect x="108" y="178" width="26" height="32" rx="3" fill="#f8bbd0" stroke="#e91e63" stroke-width="1.5"/>
+              <line x1="113" y1="186" x2="129" y2="186" stroke="#e91e63" stroke-width="1.5" opacity=".6"/>
+              <line x1="113" y1="191" x2="129" y2="191" stroke="#e91e63" stroke-width="1.5" opacity=".6"/>
+              <line x1="113" y1="196" x2="122" y2="196" stroke="#e91e63" stroke-width="1.5" opacity=".6"/>
+              <!-- Head -->
+              <ellipse cx="90" cy="98" rx="37" ry="43" fill="#f0c8a0"/>
+              <!-- Long hair -->
+              <ellipse cx="90" cy="60" rx="38" ry="16" fill="#2c1a0e"/>
+              <path d="M52 80 Q46 120 50 155" stroke="#2c1a0e" stroke-width="14" fill="none" stroke-linecap="round"/>
+              <path d="M128 80 Q134 120 130 155" stroke="#2c1a0e" stroke-width="14" fill="none" stroke-linecap="round"/>
+              <!-- Eyes -->
+              <ellipse cx="77" cy="97" rx="5" ry="6" fill="white"/>
+              <ellipse cx="103" cy="97" rx="5" ry="6" fill="white"/>
+              <circle cx="78" cy="98" r="3" fill="#2c1810"/>
+              <circle cx="104" cy="98" r="3" fill="#2c1810"/>
+              <!-- Smile -->
+              <path d="M79 115 Q90 124 101 115" stroke="#b07050" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <!-- Earrings -->
+              <circle cx="53" cy="108" r="3" fill="#e91e63" opacity=".7"/>
+              <circle cx="127" cy="108" r="3" fill="#e91e63" opacity=".7"/>
+            </svg>
+          </div>
+          <div class="mrdv-doc-card__overlay">
+            <div class="mrdv-doc-card__name">Dr. Nadia Cherkaoui</div>
+            <div class="mrdv-doc-card__spec">Dermatologue · Marrakech</div>
+          </div>
+        </div>
+
+        <!-- Card 4 — Généraliste -->
+        <div class="mrdv-doc-card">
+          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);">
+            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="90" cy="260" rx="70" ry="80" fill="#2980b9" opacity=".13"/>
+              <path d="M43 199 Q53 159 90 154 Q127 159 137 199 L145 320 H35 Z" fill="white" opacity=".93"/>
+              <!-- Blue coat trim -->
+              <path d="M43 199 Q53 159 90 154" stroke="#2980b9" stroke-width="3.5" fill="none" opacity=".5"/>
+              <path d="M137 199 Q127 159 90 154" stroke="#2980b9" stroke-width="3.5" fill="none" opacity=".5"/>
+              <!-- Stethoscope -->
+              <path d="M73 184 Q69 209 73 223 Q77 236 86 238 Q96 240 101 228 Q106 216 103 203" stroke="#2980b9" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <circle cx="103" cy="200" r="5" fill="#2980b9"/>
+              <!-- Head -->
+              <ellipse cx="90" cy="99" rx="37" ry="43" fill="#e8c49a"/>
+              <!-- Short hair -->
+              <ellipse cx="90" cy="63" rx="37" ry="15" fill="#5c3a1e"/>
+              <ellipse cx="57" cy="84" rx="7" ry="20" fill="#5c3a1e"/>
+              <ellipse cx="123" cy="84" rx="7" ry="20" fill="#5c3a1e"/>
+              <!-- Eyes -->
+              <ellipse cx="77" cy="98" rx="5" ry="6" fill="white"/>
+              <ellipse cx="103" cy="98" rx="5" ry="6" fill="white"/>
+              <circle cx="78" cy="99" r="3" fill="#1a0a00"/>
+              <circle cx="104" cy="99" r="3" fill="#1a0a00"/>
+              <!-- Beard hint -->
+              <ellipse cx="90" cy="127" rx="22" ry="8" fill="#7a5230" opacity=".25"/>
+              <!-- Smile -->
+              <path d="M79 116 Q90 125 101 116" stroke="#a07050" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="mrdv-doc-card__overlay">
+            <div class="mrdv-doc-card__name">Dr. Youssef Mansouri</div>
+            <div class="mrdv-doc-card__spec">Généraliste · Fès</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dots -->
+      <div class="mrdv-carousel-dots" id="carouselDots">
+        <div class="mrdv-dot active" data-idx="0"></div>
+        <div class="mrdv-dot" data-idx="1"></div>
+        <div class="mrdv-dot" data-idx="2"></div>
+        <div class="mrdv-dot" data-idx="3"></div>
+      </div>
+
+      <!-- Floating tags -->
+      <div class="mrdv-float-tag">
+        <div class="mrdv-float-tag__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 8l4 4 8-8" stroke="#0ea5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="mrdv-float-tag__value">Disponible</div>
+          <div class="mrdv-float-tag__label">Aujourd'hui</div>
+        </div>
+      </div>
+
+      <div class="mrdv-float-tag">
+        <div class="mrdv-float-tag__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6" stroke="#0ea5a0" stroke-width="1.5"/>
+            <path d="M8 5v3.5l2 1.5" stroke="#0ea5a0" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="mrdv-float-tag__value">~15 min</div>
+          <div class="mrdv-float-tag__label">Temps d'attente</div>
+        </div>
+      </div>
+
+    </div>
+
     <!-- Feature cards -->
     <div class="mrdv-cards" id="comment-ca-marche">
       <div class="mrdv-card">
@@ -409,5 +758,60 @@
 
   </section>
 </div>
+
+<script>
+  (function() {
+    const cards = document.querySelectorAll('.mrdv-doc-card');
+    const dots  = document.querySelectorAll('.mrdv-dot');
+    let current = 0;
+    let timer;
+
+    function goTo(idx) {
+      cards[current].classList.remove('active');
+      cards[current].classList.add('prev');
+      dots[current].classList.remove('active');
+
+      setTimeout(() => cards[(current + cards.length) % cards.length > idx
+        ? (current + cards.length) % cards.length : current].classList.remove('prev'), 700);
+
+      current = idx;
+      cards[current].classList.add('active');
+      cards[current].classList.remove('prev');
+      dots[current].classList.add('active');
+    }
+
+    function next() {
+      // clean all prev first
+      cards.forEach(c => c.classList.remove('prev'));
+      const nxt = (current + 1) % cards.length;
+      cards[current].classList.remove('active');
+      cards[current].classList.add('prev');
+      dots[current].classList.remove('active');
+      current = nxt;
+      cards[current].classList.add('active');
+      dots[current].classList.add('active');
+      setTimeout(() => cards.forEach(c => c.classList.remove('prev')), 750);
+    }
+
+    // Auto-advance every 3.5s
+    function start() { timer = setInterval(next, 3500); }
+    function stop()  { clearInterval(timer); }
+
+    // Dot clicks
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => {
+        stop();
+        cards.forEach(c => c.classList.remove('active', 'prev'));
+        dots.forEach(d => d.classList.remove('active'));
+        current = i;
+        cards[current].classList.add('active');
+        dots[current].classList.add('active');
+        start();
+      });
+    });
+
+    start();
+  })();
+</script>
 
 {% endblock %}
