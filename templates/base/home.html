@@ -1,6 +1,7 @@
 {% extends 'base/base.html' %}
 {% block title %}Accueil{% endblock %}
 {% block content %}
+{% load static %}
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
@@ -145,14 +146,6 @@
     width: 6px; height: 6px;
     background: var(--teal);
     border-radius: 50%;
-  }
-
-  /* Placeholder SVG doctor avatar */
-  .mrdv-doc-placeholder {
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
   /* Dots indicator */
@@ -542,142 +535,36 @@
     <div class="mrdv-visual">
       <div class="mrdv-carousel" id="docCarousel">
 
-        <!-- Card 1 — Cardiologue -->
+        <!-- Card 1 — add your image here -->
         <div class="mrdv-doc-card active">
-          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #e0f2f1 0%, #b2dfdb 100%);">
-            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <!-- Body -->
-              <ellipse cx="90" cy="260" rx="70" ry="80" fill="#0b9490" opacity=".18"/>
-              <!-- White coat -->
-              <path d="M40 200 Q50 160 90 155 Q130 160 140 200 L148 320 H32 Z" fill="white" opacity=".92"/>
-              <!-- Stethoscope -->
-              <path d="M72 185 Q68 210 72 225 Q76 238 85 240 Q95 242 100 230 Q105 218 102 205" stroke="#0ea5a0" stroke-width="3" fill="none" stroke-linecap="round"/>
-              <circle cx="102" cy="202" r="5" fill="#0ea5a0"/>
-              <!-- Collar/shirt -->
-              <path d="M78 155 L90 175 L102 155" fill="#0b9490" opacity=".3"/>
-              <!-- Head -->
-              <ellipse cx="90" cy="100" rx="38" ry="44" fill="#f5cba7"/>
-              <!-- Hair -->
-              <ellipse cx="90" cy="62" rx="38" ry="18" fill="#4a3728"/>
-              <ellipse cx="56" cy="85" rx="8" ry="22" fill="#4a3728"/>
-              <ellipse cx="124" cy="85" rx="8" ry="22" fill="#4a3728"/>
-              <!-- Eyes -->
-              <ellipse cx="77" cy="98" rx="5" ry="6" fill="white"/>
-              <ellipse cx="103" cy="98" rx="5" ry="6" fill="white"/>
-              <circle cx="78" cy="99" r="3" fill="#2c1810"/>
-              <circle cx="104" cy="99" r="3" fill="#2c1810"/>
-              <!-- Smile -->
-              <path d="M80 116 Q90 124 100 116" stroke="#c0856a" stroke-width="2" fill="none" stroke-linecap="round"/>
-              <!-- Shoulders -->
-              <path d="M52 155 Q40 158 38 175" stroke="white" stroke-width="3" fill="none" opacity=".9"/>
-              <path d="M128 155 Q140 158 142 175" stroke="white" stroke-width="3" fill="none" opacity=".9"/>
-            </svg>
-          </div>
+          <img src="{% static 'base/images/doc2.jpg' %}" alt="Dr. Sarah Benali" class="mrdv-doc-card__img">
           <div class="mrdv-doc-card__overlay">
             <div class="mrdv-doc-card__name">Dr. Sarah Benali</div>
             <div class="mrdv-doc-card__spec">Cardiologue · Casablanca</div>
           </div>
         </div>
 
-        <!-- Card 2 — Pédiatre -->
+        <!-- Card 2 — add your image here -->
         <div class="mrdv-doc-card">
-          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #e8f5e9 0%, #c8e6c9 100%);">
-            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="90" cy="260" rx="70" ry="80" fill="#27ae60" opacity=".14"/>
-              <path d="M42 198 Q52 158 90 153 Q128 158 138 198 L146 320 H34 Z" fill="white" opacity=".92"/>
-              <!-- Green coat trim -->
-              <path d="M42 198 Q52 158 90 153" stroke="#27ae60" stroke-width="4" fill="none" opacity=".5"/>
-              <path d="M138 198 Q128 158 90 153" stroke="#27ae60" stroke-width="4" fill="none" opacity=".5"/>
-              <!-- Stethoscope -->
-              <path d="M74 183 Q70 208 74 222 Q78 235 87 237 Q97 239 102 227 Q107 215 104 202" stroke="#27ae60" stroke-width="3" fill="none" stroke-linecap="round"/>
-              <circle cx="104" cy="199" r="5" fill="#27ae60"/>
-              <!-- Head -->
-              <ellipse cx="90" cy="97" rx="36" ry="42" fill="#fde3c4"/>
-              <!-- Hair (short) -->
-              <ellipse cx="90" cy="61" rx="36" ry="16" fill="#1a0a00"/>
-              <!-- Glasses -->
-              <rect x="69" y="93" width="16" height="11" rx="5" stroke="#1a0a00" stroke-width="2" fill="none"/>
-              <rect x="95" y="93" width="16" height="11" rx="5" stroke="#1a0a00" stroke-width="2" fill="none"/>
-              <line x1="85" y1="98" x2="95" y2="98" stroke="#1a0a00" stroke-width="2"/>
-              <!-- Eyes behind glasses -->
-              <circle cx="77" cy="98" r="3" fill="#1a0a00"/>
-              <circle cx="103" cy="98" r="3" fill="#1a0a00"/>
-              <!-- Smile -->
-              <path d="M78 114 Q90 123 102 114" stroke="#c07a5a" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <img src="{% static 'base/images/doc1.jpg' %}" alt="Dr. Karim Idrissi" class="mrdv-doc-card__img">
           <div class="mrdv-doc-card__overlay">
             <div class="mrdv-doc-card__name">Dr. Karim Idrissi</div>
             <div class="mrdv-doc-card__spec">Pédiatre · Rabat</div>
           </div>
         </div>
 
-        <!-- Card 3 — Dermatologue -->
+        <!-- Card 3 — add your image here -->
         <div class="mrdv-doc-card">
-          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #fce4ec 0%, #f8bbd0 100%);">
-            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="90" cy="262" rx="70" ry="78" fill="#e91e63" opacity=".1"/>
-              <path d="M44 200 Q54 160 90 155 Q126 160 136 200 L144 320 H36 Z" fill="white" opacity=".95"/>
-              <path d="M44 200 Q54 160 90 155" stroke="#e91e63" stroke-width="3" fill="none" opacity=".4"/>
-              <path d="M136 200 Q126 160 90 155" stroke="#e91e63" stroke-width="3" fill="none" opacity=".4"/>
-              <!-- Clipboard prop -->
-              <rect x="108" y="178" width="26" height="32" rx="3" fill="#f8bbd0" stroke="#e91e63" stroke-width="1.5"/>
-              <line x1="113" y1="186" x2="129" y2="186" stroke="#e91e63" stroke-width="1.5" opacity=".6"/>
-              <line x1="113" y1="191" x2="129" y2="191" stroke="#e91e63" stroke-width="1.5" opacity=".6"/>
-              <line x1="113" y1="196" x2="122" y2="196" stroke="#e91e63" stroke-width="1.5" opacity=".6"/>
-              <!-- Head -->
-              <ellipse cx="90" cy="98" rx="37" ry="43" fill="#f0c8a0"/>
-              <!-- Long hair -->
-              <ellipse cx="90" cy="60" rx="38" ry="16" fill="#2c1a0e"/>
-              <path d="M52 80 Q46 120 50 155" stroke="#2c1a0e" stroke-width="14" fill="none" stroke-linecap="round"/>
-              <path d="M128 80 Q134 120 130 155" stroke="#2c1a0e" stroke-width="14" fill="none" stroke-linecap="round"/>
-              <!-- Eyes -->
-              <ellipse cx="77" cy="97" rx="5" ry="6" fill="white"/>
-              <ellipse cx="103" cy="97" rx="5" ry="6" fill="white"/>
-              <circle cx="78" cy="98" r="3" fill="#2c1810"/>
-              <circle cx="104" cy="98" r="3" fill="#2c1810"/>
-              <!-- Smile -->
-              <path d="M79 115 Q90 124 101 115" stroke="#b07050" stroke-width="2" fill="none" stroke-linecap="round"/>
-              <!-- Earrings -->
-              <circle cx="53" cy="108" r="3" fill="#e91e63" opacity=".7"/>
-              <circle cx="127" cy="108" r="3" fill="#e91e63" opacity=".7"/>
-            </svg>
-          </div>
+          <img src="{% static 'base/images/doc3.jpg' %}" alt="Dr. Nadia Cherkaoui" class="mrdv-doc-card__img">
           <div class="mrdv-doc-card__overlay">
-            <div class="mrdv-doc-card__name">Dr. Nadia Cherkaoui</div>
+            <div class="mrdv-doc-card__name">Dr. Guibert Georges</div>
             <div class="mrdv-doc-card__spec">Dermatologue · Marrakech</div>
           </div>
         </div>
 
-        <!-- Card 4 — Généraliste -->
+        <!-- Card 4 — add your image here -->
         <div class="mrdv-doc-card">
-          <div class="mrdv-doc-placeholder" style="background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 100%);">
-            <svg width="180" height="320" viewBox="0 0 180 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="90" cy="260" rx="70" ry="80" fill="#2980b9" opacity=".13"/>
-              <path d="M43 199 Q53 159 90 154 Q127 159 137 199 L145 320 H35 Z" fill="white" opacity=".93"/>
-              <!-- Blue coat trim -->
-              <path d="M43 199 Q53 159 90 154" stroke="#2980b9" stroke-width="3.5" fill="none" opacity=".5"/>
-              <path d="M137 199 Q127 159 90 154" stroke="#2980b9" stroke-width="3.5" fill="none" opacity=".5"/>
-              <!-- Stethoscope -->
-              <path d="M73 184 Q69 209 73 223 Q77 236 86 238 Q96 240 101 228 Q106 216 103 203" stroke="#2980b9" stroke-width="3" fill="none" stroke-linecap="round"/>
-              <circle cx="103" cy="200" r="5" fill="#2980b9"/>
-              <!-- Head -->
-              <ellipse cx="90" cy="99" rx="37" ry="43" fill="#e8c49a"/>
-              <!-- Short hair -->
-              <ellipse cx="90" cy="63" rx="37" ry="15" fill="#5c3a1e"/>
-              <ellipse cx="57" cy="84" rx="7" ry="20" fill="#5c3a1e"/>
-              <ellipse cx="123" cy="84" rx="7" ry="20" fill="#5c3a1e"/>
-              <!-- Eyes -->
-              <ellipse cx="77" cy="98" rx="5" ry="6" fill="white"/>
-              <ellipse cx="103" cy="98" rx="5" ry="6" fill="white"/>
-              <circle cx="78" cy="99" r="3" fill="#1a0a00"/>
-              <circle cx="104" cy="99" r="3" fill="#1a0a00"/>
-              <!-- Beard hint -->
-              <ellipse cx="90" cy="127" rx="22" ry="8" fill="#7a5230" opacity=".25"/>
-              <!-- Smile -->
-              <path d="M79 116 Q90 125 101 116" stroke="#a07050" stroke-width="2" fill="none" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <img src="{% static 'base/images/doc4.jpg' %}" alt="Dr. Youssef Mansouri" class="mrdv-doc-card__img">
           <div class="mrdv-doc-card__overlay">
             <div class="mrdv-doc-card__name">Dr. Youssef Mansouri</div>
             <div class="mrdv-doc-card__spec">Généraliste · Fès</div>
