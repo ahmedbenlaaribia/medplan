@@ -490,4 +490,65 @@
 
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('.ml-search');
+    const inputs = form.querySelectorAll('input, select');
+    const grid = document.querySelector('.ml-grid');
+    
+    let debounceTimer;
+    
+    const performSearch = () => {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(new FormData(form));
+        url.search = params.toString();
+        
+        grid.style.transition = 'opacity 0.2s';
+        grid.style.opacity = '0.4';
+        
+        fetch(url.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            grid.innerHTML = doc.querySelector('.ml-grid').innerHTML;
+            
+            const oldMeta = document.querySelector('.ml-meta');
+            const newMeta = doc.querySelector('.ml-meta');
+            
+            if (newMeta) {
+                if (oldMeta) {
+                    oldMeta.innerHTML = newMeta.innerHTML;
+                } else {
+                    form.insertAdjacentHTML('afterend', newMeta.outerHTML);
+                }
+            } else if (oldMeta) {
+                oldMeta.remove();
+            }
+            
+            grid.style.opacity = '1';
+            window.history.replaceState({}, '', url.toString());
+        });
+    };
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 350);
+        });
+    });
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearTimeout(debounceTimer);
+        performSearch();
+    });
+});
+</script>
+
 {% endblock %}

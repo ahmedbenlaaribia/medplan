@@ -1,0 +1,65 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Inscription - MediRDV{% endblock %}
+
+{% block content %}
+<div class="cards-grid" style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding-top: 40px; padding-bottom: 40px;">
+    <div class="card" style="width: 100%; max-width: 500px;">
+        <h2 class="text-center" style="margin-bottom: 20px;">Inscription</h2>
+        
+        {% if error %}
+            <div style="background-color: var(--red); color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
+                {{ error }}
+            </div>
+        {% endif %}
+        
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            
+            <div style="display: flex; gap: 15px;">
+                <div class="field" style="flex: 1;">
+                    <label for="first_name">Prénom</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ data.first_name|default:'' }}" required>
+                </div>
+                <div class="field" style="flex: 1;">
+                    <label for="last_name">Nom</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ data.last_name|default:'' }}" required>
+                </div>
+            </div>
+            
+            <div class="field">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" value="{{ data.username|default:'' }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="email">Adresse Email</label>
+                <input type="email" id="email" name="email" value="{{ data.email|default:'' }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="telephone">Téléphone</label>
+                <input type="text" id="telephone" name="telephone" value="{{ data.telephone|default:'' }}" required>
+            </div>
+            
+            <div class="field">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="field">
+                <label for="confirm_password">Confirmer le mot de passe</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            
+            <div class="field mt-20 text-center">
+                <button type="submit" class="btn btn-green" style="width: 100%;">Créer mon compte</button>
+            </div>
+        </form>
+        
+        <p class="text-center mt-20" style="font-size: 14px;">
+            Déjà inscrit ? <a href="{% url 'login' %}" style="color: var(--teal); text-decoration: none;">Se connecter</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

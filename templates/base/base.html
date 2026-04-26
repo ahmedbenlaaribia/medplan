@@ -277,6 +277,21 @@
         Mes RDV
       </a>
     </li>
+    {% if request.user.is_authenticated %}
+    <li style="margin-left: 10px; font-weight: 500; font-size: 14px; color: var(--navy);">
+      👋 {{ request.user.first_name|default:request.user.username }}
+    </li>
+    <li>
+      <a href="{% url 'logout' %}" style="color: var(--red);">Déconnexion</a>
+    </li>
+    {% else %}
+    <li>
+      <a href="{% url 'login' %}">Connexion</a>
+    </li>
+    <li>
+      <a href="{% url 'register' %}" style="font-weight: 500;">S'inscrire</a>
+    </li>
+    {% endif %}
   </ul>
 
   <button class="site-nav__burger" id="navBurger" aria-label="Menu" aria-expanded="false">
@@ -289,6 +304,16 @@
   <a href="{% url 'home' %}">Accueil</a>
   <a href="{% url 'medecins_list' %}">Médecins</a>
   <a href="{% url 'rdv_list' %}" class="site-nav__cta">Mes RDV</a>
+  
+  <div style="border-top: 1px solid rgba(11,31,58,.1); margin: 10px 0;"></div>
+  
+  {% if request.user.is_authenticated %}
+    <div style="padding: 11px 14px; font-weight: 500; color: var(--navy);">👋 {{ request.user.first_name|default:request.user.username }}</div>
+    <a href="{% url 'logout' %}" style="color: var(--red);">Déconnexion</a>
+  {% else %}
+    <a href="{% url 'login' %}">Connexion</a>
+    <a href="{% url 'register' %}">S'inscrire</a>
+  {% endif %}
 </div>
 
 <!-- ── PAGE CONTENT ───────────────────────────────────────── -->
