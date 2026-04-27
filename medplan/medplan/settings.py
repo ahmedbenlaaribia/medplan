@@ -84,7 +84,7 @@ DATABASES = {
          'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'medplandb',
         'USER': 'postgres',          # ton user PostgreSQL
-        'PASSWORD': 'ouss',
+        'PASSWORD': '0000',
         'HOST': 'localhost',
         'PORT': '5432',
     }
