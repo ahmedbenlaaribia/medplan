@@ -1,38 +1,453 @@
 {% extends 'base/base.html' %}
-
-{% block title %}Connexion - MediRDV{% endblock %}
-
+{% block title %}Connexion — MediRDV{% endblock %}
 {% block content %}
-<div class="cards-grid" style="display: flex; justify-content: center; align-items: center; min-height: 70vh;">
-    <div class="card" style="width: 100%; max-width: 400px;">
-        <h2 class="text-center" style="margin-bottom: 20px;">Connexion</h2>
-        
-        {% if error %}
-            <div style="background-color: var(--red); color: white; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
-                {{ error }}
-            </div>
-        {% endif %}
-        
-        <form method="POST" action="{% url 'login' %}">
-            {% csrf_token %}
-            <div class="field">
-                <label for="username">Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            
-            <div class="field">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <div class="field mt-20 text-center">
-                <button type="submit" class="btn" style="width: 100%;">Se connecter</button>
-            </div>
-        </form>
-        
-        <p class="text-center mt-20" style="font-size: 14px;">
-            Pas encore de compte ? <a href="{% url 'register' %}" style="color: var(--teal); text-decoration: none;">S'inscrire</a>
-        </p>
+
+<style>
+  /* ── PAGE ───────────────────────────────────────────────────── */
+  .auth-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ─────────────────────────────────────────────── */
+  .auth-panel {
+    background: linear-gradient(145deg, var(--navy) 0%, #132d52 60%, #0ea5a0 140%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px 52px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Decorative circles */
+  .auth-panel__circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.07);
+  }
+  .auth-panel__circle:nth-child(1) { width: 340px; height: 340px; bottom: -80px; right: -80px; }
+  .auth-panel__circle:nth-child(2) { width: 220px; height: 220px; bottom: -20px; right: -20px; }
+  .auth-panel__circle:nth-child(3) { width: 160px; height: 160px; top: 60px; left: -60px; }
+
+  .auth-panel__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  .auth-panel__logo-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .auth-panel__logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: white;
+  }
+
+  .auth-panel__logo-text em { color: var(--teal-light); font-style: normal; }
+
+  .auth-panel__body {
+    position: relative;
+    z-index: 1;
+  }
+
+  .auth-panel__title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .auth-panel__title em {
+    font-style: italic;
+    color: var(--teal-light);
+  }
+
+  .auth-panel__sub {
+    font-size: 14.5px;
+    color: rgba(255,255,255,.6);
+    line-height: 1.65;
+    font-weight: 300;
+    max-width: 300px;
+    margin-bottom: 36px;
+  }
+
+  /* Feature list */
+  .auth-panel__features {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .auth-panel__feature {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13.5px;
+    color: rgba(255,255,255,.75);
+  }
+
+  .auth-panel__feature-icon {
+    width: 30px; height: 30px;
+    background: rgba(14,165,160,.2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .auth-panel__footer {
+    position: relative;
+    z-index: 1;
+    font-size: 12px;
+    color: rgba(255,255,255,.3);
+  }
+
+  /* ── RIGHT PANEL (form) ─────────────────────────────────────── */
+  .auth-form-side {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cream);
+    padding: 48px 40px;
+  }
+
+  .auth-form-wrap {
+    width: 100%;
+    max-width: 380px;
+    opacity: 0;
+    animation: authUp .6s .1s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .auth-form-wrap__eyebrow {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+
+  .auth-form-wrap__title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.9rem;
+    color: var(--navy);
+    margin-bottom: 6px;
+    line-height: 1.15;
+  }
+
+  .auth-form-wrap__sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 32px;
+  }
+
+  /* Error alert */
+  .auth-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff0f0;
+    border: 1px solid rgba(231,76,60,.2);
+    border-left: 3px solid var(--red);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 22px;
+    font-size: 13.5px;
+    color: #c0392b;
+  }
+
+  /* Fields */
+  .auth-field {
+    margin-bottom: 18px;
+  }
+
+  .auth-field label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--navy);
+    opacity: .7;
+    margin-bottom: 8px;
+  }
+
+  .auth-field label svg { color: var(--teal); }
+
+  .auth-input-wrap {
+    position: relative;
+  }
+
+  .auth-input-wrap input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid rgba(11,31,58,.1);
+    border-radius: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: var(--navy);
+    background: white;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    box-sizing: border-box;
+  }
+
+  .auth-input-wrap input:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(14,165,160,.1);
+  }
+
+  /* Toggle password visibility */
+  .auth-eye {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    display: flex;
+    transition: color .2s;
+  }
+
+  .auth-eye:hover { color: var(--navy); }
+
+  /* Submit */
+  .auth-submit {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 14px 24px;
+    border-radius: 13px;
+    margin-top: 8px;
+    transition: background .2s, transform .18s, box-shadow .2s;
+    box-shadow: 0 4px 16px rgba(11,31,58,.16);
+  }
+
+  .auth-submit:hover {
+    background: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(14,165,160,.3);
+  }
+
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(11,31,58,.08);
+  }
+
+  .auth-footer-link {
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--text-muted);
+  }
+
+  .auth-footer-link a {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color .2s;
+  }
+
+  .auth-footer-link a:hover { color: #0b9490; }
+
+  @keyframes authUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── RESPONSIVE ─────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .auth-page { grid-template-columns: 1fr; }
+    .auth-panel { display: none; }
+    .auth-form-side { padding: 80px 24px 40px; min-height: 100vh; }
+  }
+</style>
+
+<div class="auth-page">
+
+  <!-- Left decorative panel -->
+  <div class="auth-panel">
+    <div class="auth-panel__circle"></div>
+    <div class="auth-panel__circle"></div>
+    <div class="auth-panel__circle"></div>
+
+    <a href="{% url 'home' %}" class="auth-panel__logo">
+      <div class="auth-panel__logo-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="6.5" y="1" width="5" height="16" rx="1.5" fill="white"/>
+          <rect x="1" y="6.5" width="16" height="5" rx="1.5" fill="white"/>
+        </svg>
+      </div>
+      <span class="auth-panel__logo-text">Medi<em>RDV</em></span>
+    </a>
+
+    <div class="auth-panel__body">
+      <h2 class="auth-panel__title">Votre santé,<br><em>en un clic</em></h2>
+      <p class="auth-panel__sub">Connectez-vous pour gérer vos rendez-vous et accéder à votre espace patient.</p>
+
+      <div class="auth-panel__features">
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="2" width="12" height="11" rx="1.5" stroke="#5ecbc7" stroke-width="1.3"/>
+              <path d="M4 1v2M10 1v2M1 6h12" stroke="#5ecbc7" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          Gérez vos rendez-vous facilement
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="5" r="3" stroke="#5ecbc7" stroke-width="1.3"/>
+              <path d="M1.5 13c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="#5ecbc7" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          Accédez aux meilleurs spécialistes
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1L2 3.5v4C2 10.5 4.2 12.8 7 13.5 9.8 12.8 12 10.5 12 7.5v-4L7 1z" stroke="#5ecbc7" stroke-width="1.3" stroke-linejoin="round"/>
+              <path d="M4.5 7l2 2 3-3" stroke="#5ecbc7" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          Données sécurisées et confidentielles
+        </div>
+      </div>
     </div>
+
+    <p class="auth-panel__footer">© {% now "Y" %} MediRDV — Tous droits réservés</p>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="auth-form-side">
+    <div class="auth-form-wrap">
+
+      <div class="auth-form-wrap__eyebrow">Espace patient</div>
+      <h1 class="auth-form-wrap__title">Connexion</h1>
+      <p class="auth-form-wrap__sub">Bienvenue ! Entrez vos identifiants pour continuer.</p>
+
+      {% if error %}
+      <div class="auth-error">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" flex-shrink="0">
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'login' %}" novalidate>
+        {% csrf_token %}
+
+        <div class="auth-field">
+          <label for="username">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="4" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M1 11c0-2.8 2.2-4 5-4s5 1.2 5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Nom d'utilisateur
+          </label>
+          <div class="auth-input-wrap">
+            <input type="text" id="username" name="username" placeholder="votre_nom" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="password">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <rect x="2" y="5" width="8" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M4 5V3.5a2 2 0 014 0V5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <circle cx="6" cy="8" r="1" fill="currentColor"/>
+            </svg>
+            Mot de passe
+          </label>
+          <div class="auth-input-wrap">
+            <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="auth-eye" id="togglePwd" aria-label="Afficher le mot de passe">
+              <svg id="eyeIcon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.3"/>
+                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-submit">
+          Se connecter
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+            <path d="M3 7.5h9M8 4l4 3.5L8 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+
+      <div class="auth-divider">ou</div>
+
+      <p class="auth-footer-link">
+        Pas encore de compte ? <a href="{% url 'register' %}">S'inscrire gratuitement</a>
+      </p>
+
+    </div>
+  </div>
+
 </div>
+
+<script>
+  const btn = document.getElementById('togglePwd');
+  const pwd = document.getElementById('password');
+  btn.addEventListener('click', () => {
+    const show = pwd.type === 'password';
+    pwd.type = show ? 'text' : 'password';
+    btn.setAttribute('aria-label', show ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+    document.getElementById('eyeIcon').innerHTML = show
+      ? `<path d="M2 2l12 12M6.5 6.6A2 2 0 009.4 9.5M5.2 5.2C3.5 6.2 2.2 7.5 1 8s2.5 5 7 5a7.5 7.5 0 003.8-1.2M9 4.3C8.4 4.1 7.7 4 7 4 2.5 4 1 8 1 8s.6 1.2 1.8 2.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>`
+      : `<path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/>`;
+  });
+</script>
+
 {% endblock %}

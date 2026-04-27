@@ -1,39 +1,417 @@
 {% extends 'base/base.html' %}
 {% block title %}Mes Rendez-vous{% endblock %}
 {% block content %}
-<h2>Mes Rendez-vous</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Medecin</th>
-      <th>Date</th>
-      <th>Heure</th>
-      <th>Statut</th>
-    </tr>
-  </thead>
-  <tbody>
+
+<style>
+  /* ── PAGE ───────────────────────────────────────────────────── */
+  .rdvl-page {
+    padding: 48px 0 80px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────────── */
+  .rdvl-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: rdvlUp .5s .05s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .rdvl-header__eyebrow {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+
+  .rdvl-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    color: var(--navy);
+    line-height: 1.15;
+  }
+
+  .rdvl-header__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teal);
+    color: white;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 11px 20px;
+    border-radius: 12px;
+    transition: background .2s, transform .18s;
+    box-shadow: 0 4px 14px rgba(14,165,160,.25);
+    white-space: nowrap;
+  }
+
+  .rdvl-header__cta:hover {
+    background: #0b9490;
+    transform: translateY(-1px);
+  }
+
+  /* ── STAT PILLS ─────────────────────────────────────────────── */
+  .rdvl-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: rdvlUp .5s .12s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .rdvl-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid rgba(11,31,58,.07);
+    border-radius: 12px;
+    padding: 10px 16px;
+    box-shadow: 0 2px 10px rgba(11,31,58,.05);
+  }
+
+  .rdvl-stat__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .rdvl-stat__dot.green  { background: var(--green); }
+  .rdvl-stat__dot.yellow { background: #f39c12; }
+  .rdvl-stat__dot.grey   { background: var(--grey); }
+  .rdvl-stat__dot.red    { background: var(--red); }
+
+  .rdvl-stat__count {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--navy);
+    line-height: 1;
+  }
+
+  .rdvl-stat__label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ── CARD LIST ──────────────────────────────────────────────── */
+  .rdvl-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rdvl-card {
+    background: white;
+    border-radius: 18px;
+    border: 1px solid rgba(11,31,58,.06);
+    box-shadow: 0 2px 14px rgba(11,31,58,.05);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: rdvlUp .5s cubic-bezier(.22,1,.36,1) forwards;
+    transition: box-shadow .2s, transform .2s;
+  }
+
+  .rdvl-card:hover {
+    box-shadow: 0 6px 28px rgba(11,31,58,.1);
+    transform: translateY(-2px);
+  }
+
+  .rdvl-card:nth-child(1) { animation-delay: .18s; }
+  .rdvl-card:nth-child(2) { animation-delay: .24s; }
+  .rdvl-card:nth-child(3) { animation-delay: .30s; }
+  .rdvl-card:nth-child(4) { animation-delay: .36s; }
+  .rdvl-card:nth-child(5) { animation-delay: .42s; }
+  .rdvl-card:nth-child(6) { animation-delay: .48s; }
+
+  /* Avatar */
+  .rdvl-card__avatar {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e8f4f4, #d4eeed);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid rgba(14,165,160,.15);
+  }
+
+  /* Doctor info */
+  .rdvl-card__doctor {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .rdvl-card__name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--navy);
+    margin-bottom: 3px;
+  }
+
+  .rdvl-card__spec {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  /* Date/time block */
+  .rdvl-card__datetime {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 110px;
+  }
+
+  .rdvl-card__date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    color: var(--navy);
+    font-weight: 500;
+  }
+
+  .rdvl-card__date svg,
+  .rdvl-card__time svg { color: var(--teal); opacity: .7; }
+
+  .rdvl-card__time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Status badge */
+  .rdvl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 13px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .rdvl-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .rdvl-badge.confirme {
+    background: rgba(39,174,96,.1);
+    color: #1e8449;
+  }
+  .rdvl-badge.confirme::before { background: var(--green); }
+
+  .rdvl-badge.annule {
+    background: rgba(231,76,60,.1);
+    color: #c0392b;
+  }
+  .rdvl-badge.annule::before { background: var(--red); }
+
+  .rdvl-badge.termine {
+    background: rgba(127,140,141,.1);
+    color: #5d6d7e;
+  }
+  .rdvl-badge.termine::before { background: var(--grey); }
+
+  .rdvl-badge.attente {
+    background: rgba(243,156,18,.1);
+    color: #d68910;
+  }
+  .rdvl-badge.attente::before { background: #f39c12; }
+
+  /* ── EMPTY STATE ────────────────────────────────────────────── */
+  .rdvl-empty {
+    text-align: center;
+    padding: 80px 20px;
+    opacity: 0;
+    animation: rdvlUp .6s .2s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .rdvl-empty__icon {
+    width: 64px; height: 64px;
+    background: rgba(14,165,160,.1);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .rdvl-empty h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+
+  .rdvl-empty p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .rdvl-empty__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--navy);
+    color: white;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 22px;
+    border-radius: 12px;
+    transition: background .2s;
+  }
+
+  .rdvl-empty__btn:hover { background: var(--teal); }
+
+  /* ── ANIMATION ──────────────────────────────────────────────── */
+  @keyframes rdvlUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 560px) {
+    .rdvl-card { flex-direction: column; align-items: flex-start; }
+    .rdvl-card__datetime { flex-direction: row; gap: 16px; }
+  }
+</style>
+
+<div class="rdvl-page">
+
+  <!-- Header -->
+  <div class="rdvl-header">
+    <div>
+      <div class="rdvl-header__eyebrow">Espace patient</div>
+      <h2>Mes Rendez-vous</h2>
+    </div>
+    <a href="{% url 'medecins_list' %}" class="rdvl-header__cta">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1v12M1 7l6 6 6-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Nouveau rendez-vous
+    </a>
+  </div>
+
+  {% if rdvs %}
+
+  <!-- Stats row -->
+  <div class="rdvl-stats">
+    <div class="rdvl-stat">
+      <div class="rdvl-stat__dot yellow"></div>
+      <div class="rdvl-stat__count">{{ rdvs|length }}</div>
+      <div class="rdvl-stat__label">Total</div>
+    </div>
+    <div class="rdvl-stat">
+      <div class="rdvl-stat__dot green"></div>
+      <div class="rdvl-stat__count">
+        {% with rdvs|dictsort:"statut" as sorted %}
+          {{ rdvs|length }}
+        {% endwith %}
+      </div>
+      <div class="rdvl-stat__label">Confirmés</div>
+    </div>
+    <div class="rdvl-stat">
+      <div class="rdvl-stat__dot yellow"></div>
+      <div class="rdvl-stat__count">—</div>
+      <div class="rdvl-stat__label">En attente</div>
+    </div>
+  </div>
+
+  <!-- List -->
+  <div class="rdvl-list">
     {% for rdv in rdvs %}
-    <tr>
-      <td>{{ rdv.medecin }}</td>
-      <td>{{ rdv.date }}</td>
-      <td>{{ rdv.heure }}</td>
-      <td>
-        {% if rdv.statut == 'confirme' %}
-          <span class="badge badge-green">Confirme</span>
-        {% elif rdv.statut == 'annule' %}
-          <span class="badge badge-red">Annule</span>
-        {% elif rdv.statut == 'termine' %}
-          <span class="badge badge-grey">Termine</span>
-        {% else %}
-          <span class="badge badge-yellow">En attente</span>
+    <div class="rdvl-card">
+
+      <!-- Avatar -->
+      <div class="rdvl-card__avatar">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="8" r="4" stroke="#0ea5a0" stroke-width="1.5"/>
+          <path d="M3 19c0-4.5 3.6-7 8-7s8 2.5 8 7" stroke="#0ea5a0" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Doctor -->
+      <div class="rdvl-card__doctor">
+        <div class="rdvl-card__name">{{ rdv.medecin }}</div>
+        {% if rdv.medecin.specialite %}
+        <div class="rdvl-card__spec">{{ rdv.medecin.specialite }}</div>
         {% endif %}
-      </td>
-    </tr>
-    {% empty %}
-    <tr>
-      <td colspan="4" class="text-muted text-center">Aucun rendez-vous.</td>
-    </tr>
+      </div>
+
+      <!-- Date & time -->
+      <div class="rdvl-card__datetime">
+        <div class="rdvl-card__date">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <rect x="1" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M4 1v2M9 1v2M1 5.5h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          {{ rdv.date }}
+        </div>
+        <div class="rdvl-card__time">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M6.5 4v3l2 1.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          {{ rdv.heure }}
+        </div>
+      </div>
+
+      <!-- Status badge -->
+      {% if rdv.statut == 'confirme' %}
+        <span class="rdvl-badge confirme">Confirmé</span>
+      {% elif rdv.statut == 'annule' %}
+        <span class="rdvl-badge annule">Annulé</span>
+      {% elif rdv.statut == 'termine' %}
+        <span class="rdvl-badge termine">Terminé</span>
+      {% else %}
+        <span class="rdvl-badge attente">En attente</span>
+      {% endif %}
+
+    </div>
     {% endfor %}
-  </tbody>
-</table>
+  </div>
+
+  {% else %}
+
+  <!-- Empty state -->
+  <div class="rdvl-empty">
+    <div class="rdvl-empty__icon">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect x="3" y="4" width="22" height="21" rx="3" stroke="#0ea5a0" stroke-width="1.6"/>
+        <path d="M9 3v4M19 3v4M3 11h22" stroke="#0ea5a0" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M9 17h10M9 21h6" stroke="#0ea5a0" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h3>Aucun rendez-vous</h3>
+    <p>Vous n'avez pas encore pris de rendez-vous.</p>
+    <a href="{% url 'medecins_list' %}" class="rdvl-empty__btn">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Trouver un médecin
+    </a>
+  </div>
+
+  {% endif %}
+
+</div>
+
 {% endblock %}
